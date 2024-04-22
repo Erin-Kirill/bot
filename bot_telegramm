@@ -27,7 +27,7 @@ def send_to_selected_group(update: Update, context: CallbackContext) -> None:
         update.message.reply_text("Группа не найдена.")
 
 def main():
-    updater = Updater("7024454607:AAHId2YBtt31wUzOO90EiXZrRtXdtxtOroI")
+    updater = Updater()
 
     dispatcher = updater.dispatcher
     dispatcher.add_handler(CommandHandler("start", start))
