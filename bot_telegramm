@@ -1,0 +1,42 @@
+from telegram import Update
+from telegram import KeyboardButton, ReplyKeyboardMarkup
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
+
+
+registered_groups = {}
+
+def start(update: Update, context: CallbackContext) -> None:
+    update.message.reply_text("Добро пожаловать! Чтобы зарегистрировать группу, используйте команду /addgroup Название_группы.")
+
+def add_group(update: Update, context: CallbackContext) -> None:
+    group_name = update.message.text.split(" ", 1)[1]
+    registered_groups[group_name] = update.message.chat.id
+    update.message.reply_text(f"Группа '{group_name}' успешно зарегистрирована.")
+
+def send_message_to_group(update: Update, context: CallbackContext) -> None:
+    group_names = [KeyboardButton(name) for name in registered_groups.keys()]
+    reply_markup = ReplyKeyboardMarkup([group_names], resize_keyboard=True)
+    update.message.reply_text("Выберите группу для отправки сообщения.", reply_markup=reply_markup)
+
+def send_to_selected_group(update: Update, context: CallbackContext) -> None:
+    user_input = update.message.text
+    chat_id = registered_groups.get(user_input)
+    if chat_id:
+        context.bot.send_message(chat_id=chat_id, text="Сообщение от пользователя: " + update.message.text)
+    else:
+        update.message.reply_text("Группа не найдена.")
+
+def main():
+    updater = Updater("7024454607:AAHId2YBtt31wUzOO90EiXZrRtXdtxtOroI")
+
+    dispatcher = updater.dispatcher
+    dispatcher.add_handler(CommandHandler("start", start))
+    dispatcher.add_handler(CommandHandler("addgroup", add_group))
+    dispatcher.add_handler(CommandHandler("send", send_message_to_group))
+    dispatcher.add_handler(MessageHandler(Filters.text, send_to_selected_group))
+
+    updater.start_polling()
+    updater.idle()
+
+if __name__ == '__main__':
+    main()
